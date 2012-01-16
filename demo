@@ -1,0 +1,13 @@
+decl
+	integer x,y[10],z;
+enddecl
+begin
+	read(x);
+	read(y);
+	z=10+2-x;
+	write(z);
+	write(x==y);
+	write(x!=y);
+	write(x>y);
+	write(x>=y);
+end
