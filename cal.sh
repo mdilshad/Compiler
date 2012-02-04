@@ -1,4 +1,4 @@
-lex calc.l
-yacc -d calc.y
+lex compiler.l
+yacc -d compiler.y
 gcc lex.yy.c y.tab.c -ll
 

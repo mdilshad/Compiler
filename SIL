@@ -1,0 +1,31 @@
+decl
+	
+enddecl
+integer dilshad(boolean x,y)
+{
+	decl
+	enddecl
+	begin
+		return 5;
+	end
+}
+integer main()
+{
+	decl
+		integer array[5],i,j,k2;
+	enddecl
+	begin
+		i = 0;
+		j=2;
+		while(i<5)do
+			read(array[i]);
+			i = i+1;
+		endwhile
+		i = 0;
+		while(i<5)do
+			write(array[i]);
+			i = i+1;
+		endwhile
+		return 5;
+	end
+}

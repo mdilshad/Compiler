@@ -48,17 +48,28 @@
      DECL = 264,
      ENDDECL = 265,
      INTEGER = 266,
-     AND = 267,
-     OR = 268,
-     NOT = 269,
-     GT = 270,
-     GE = 271,
-     LT = 272,
-     LE = 273,
-     EQ = 274,
-     NE = 275,
-     FALS = 276,
-     TRU = 277
+     BOOLEAN = 267,
+     AND = 268,
+     OR = 269,
+     NOT = 270,
+     GT = 271,
+     GE = 272,
+     LT = 273,
+     LE = 274,
+     EQ = 275,
+     NE = 276,
+     FALS = 277,
+     TRU = 278,
+     IF = 279,
+     ELSE = 280,
+     THEN = 281,
+     ENDIF = 282,
+     WHILE = 283,
+     DO = 284,
+     ENDWHILE = 285,
+     RETURN = 286,
+     MAIN = 287,
+     NQ = 288
    };
 #endif
 /* Tokens.  */
@@ -71,17 +82,28 @@
 #define DECL 264
 #define ENDDECL 265
 #define INTEGER 266
-#define AND 267
-#define OR 268
-#define NOT 269
-#define GT 270
-#define GE 271
-#define LT 272
-#define LE 273
-#define EQ 274
-#define NE 275
-#define FALS 276
-#define TRU 277
+#define BOOLEAN 267
+#define AND 268
+#define OR 269
+#define NOT 270
+#define GT 271
+#define GE 272
+#define LT 273
+#define LE 274
+#define EQ 275
+#define NE 276
+#define FALS 277
+#define TRU 278
+#define IF 279
+#define ELSE 280
+#define THEN 281
+#define ENDIF 282
+#define WHILE 283
+#define DO 284
+#define ENDWHILE 285
+#define RETURN 286
+#define MAIN 287
+#define NQ 288
 
 
 
@@ -91,16 +113,16 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 11 "calc.y"
+#line 12 "compiler.y"
 
 	int Num;
-	char ch;
+	char ch,*chp;
 	struct tnode* Node;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 104 "y.tab.h"
+#line 126 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
