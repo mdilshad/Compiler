@@ -6,6 +6,10 @@ struct ArgStruct{
 
 	struct ArgStruct *NEXT;// Pointer to next Argument Entry 
 };
+union BINDING{
+	int * IBINDING;
+	//Tnode *NBINDING;
+};
 struct Gsymbol {
 
 	char *NAME; // Name of the Identifier
@@ -17,6 +21,8 @@ struct Gsymbol {
 	int SIZE; // Size field for arrays
 
 	int *BINDING; // Address of the Identifier in Memory
+	
+	struct tnode *FNode; // Address of the Function in Tree
 
 	struct ArgStruct *ARGLIST; // Argument List for functions
 
@@ -61,8 +67,13 @@ typedef struct tnode {
 	struct tnode *Ptr1, *Ptr2, *Ptr3;
 	/* Maximum of three subtrees (3 required for IF THEN ELSE */
 
-	struct Gsymbol *Gentry; // For global identifiers/functions
+	//struct Gsymbol *Gentry; // For global identifiers/functions
 
-	struct Lsymbol *Lentry; // For Local variables
+	//struct Lsymbol *Lentry; // For Local variables
 
 }Tnode;
+
+struct Gsymbol *T;
+struct Lsymbol *L;
+Tnode *temp1,*temp2,*MainNode;
+int flag;

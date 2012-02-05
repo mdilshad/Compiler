@@ -4,7 +4,6 @@
     #include<stdio.h>
     #include"Action.h"
    int i,expval;
-   Tnode *temp1,*temp2,*MainNode;
    extern FILE *yyin;
    extern int n;
 %}
@@ -16,7 +15,7 @@
 };
 %token <Num> DIGIT
 %token <chp> VARIABLE
-%type <Node> E BE SList Statement DStatement DStatementI DStatementB SDecl Rstat Func Args ArgsI ArgsB ArgsEnd ElseStmt GDStatement GDStatementI GDStatementB
+%type <Node> E SList Statement DStatement DStateInt DStateBool Rstat Func ParaList Parameter Args ArgsInt ArgsBool ArgEnd ElseStmt GDStatement GDStateInt GDStateBool
 %token READ WRITE BGIN END DECL ENDDECL INTEGER BOOLEAN AND OR NOT GT GE LT LE EQ NE FALS TRU IF ELSE THEN ENDIF WHILE DO ENDWHILE RETURN MAIN
 %right '='
 %left '+' '-' 
@@ -28,32 +27,32 @@
 
 //############################### START CFG ############################################################
 
-Program : DECL  GDStatement ENDDECL  Func{ };
+Program : DECL  GDStatement ENDDECL  Func		{Compile($2,$4); };
 
 //############################### GLOBEL DECL STATEMENTS ENDDECL ####################################################
 
 
-GDStatement:INTEGER VARIABLE GDStatementI GDStatement		{
-								temp1 = TreeCreate(Integer,1,$2,NULL,NULL,NULL,NULL,GDecl);
+GDStatement:INTEGER VARIABLE GDStateInt GDStatement		{
+								temp1 = TreeCreate(Integer,1,$2,NULL,NULL,NULL,NULL,Decl);
 								$$=TreeCreate(Integer,0,'\0',NULL,temp1,$3,$4,Continue);};
 
-	|INTEGER VARIABLE '[' DIGIT ']' GDStatementI GDStatement {
-										temp1 = TreeCreate(Integer,$4,$2,NULL,NULL,NULL,NULL,GArray);
+	|INTEGER VARIABLE '[' DIGIT ']' GDStateInt GDStatement {
+										temp1 = TreeCreate(Integer,$4,$2,NULL,NULL,NULL,NULL,Array);
 										$$=TreeCreate(Integer,0,'\0',NULL,temp1,$6,$7,Continue);};
 										
-	|INTEGER VARIABLE '(' Args ')' GDStatementI GDStatement		{
+	|INTEGER VARIABLE '(' Args ')' GDStateInt GDStatement		{
 								temp1 = TreeCreate(Integer,0,$2,$4,NULL,NULL,NULL,FunctionDecl);
 								$$=TreeCreate(Integer,0,'\0',NULL,temp1,$6,$7,Continue);};
 										
-	|BOOLEAN VARIABLE GDStatementB GDStatement		{
-								temp1 = TreeCreate(Boolean,1,$2,NULL,NULL,NULL,NULL,GDecl);
+	|BOOLEAN VARIABLE GDStateBool GDStatement		{
+								temp1 = TreeCreate(Boolean,1,$2,NULL,NULL,NULL,NULL,Decl);
 								$$=TreeCreate(Boolean,0,'\0',NULL,temp1,$3,$4,Continue);};
 
-	| BOOLEAN VARIABLE '[' DIGIT ']' GDStatementB GDStatement {
+	|BOOLEAN VARIABLE '[' DIGIT ']' GDStateBool GDStatement {
 										temp1 = TreeCreate(Boolean,$4,$2,NULL,NULL,NULL,NULL,Array);
 										$$=TreeCreate(Boolean,0,'\0',NULL,temp1,$6,$7,Continue);};
 										
-	|BOOLEAN VARIABLE '(' Args ')' GDStatementB GDStatement		{
+	|BOOLEAN VARIABLE '(' Args ')' GDStateBool GDStatement		{
 								temp1 = TreeCreate(Boolean,0,$2,$4,NULL,NULL,NULL,FunctionDecl);
 								$$=TreeCreate(Boolean,0,'\0',NULL,temp1,$6,$7,Continue);};
 
@@ -62,87 +61,89 @@ GDStatement:INTEGER VARIABLE GDStatementI GDStatement		{
 
 //############################### MORE GLOBAL INTEGER DECLARETION ####################################################
 
-GDStatementI: ',' VARIABLE GDStatementI				{	$$=TreeCreate(Integer,1,$2,NULL,$3,NULL,NULL,GDecl);};
+GDStateInt: ',' VARIABLE GDStateInt				{	$$=TreeCreate(Integer,1,$2,NULL,$3,NULL,NULL,Decl);};
 
-	| ',' VARIABLE '[' DIGIT ']' GDStatementI 		{ $$=TreeCreate(Integer,$4,$2,NULL,$6,NULL,NULL,GArray);};
+	| ',' VARIABLE '[' DIGIT ']' GDStateInt 		{ $$=TreeCreate(Integer,$4,$2,NULL,$6,NULL,NULL,Array);};
 	
-	| ',' VARIABLE '(' Args ')' GDStatementI			{	$$=TreeCreate(Integer,0,$2,$4,$6,NULL,NULL,FunctionDecl);};
+	| ',' VARIABLE '(' Args ')' GDStateInt			{	$$=TreeCreate(Integer,0,$2,$4,$6,NULL,NULL,FunctionDecl);};
 
 	| ';'  			{$$ = NULL; };
 	
 
 //############################### MORE GLOBAL BOOLEAN DECLARETION ####################################################
 
-GDStatementB: ',' VARIABLE GDStatementB				{	$$=TreeCreate(Boolean,1,$2,NULL,$3,NULL,NULL,GDecl);};
+GDStateBool: ',' VARIABLE GDStateBool				{	$$=TreeCreate(Boolean,1,$2,NULL,$3,NULL,NULL,Decl);};
 
-	| ',' VARIABLE '[' DIGIT ']' GDStatementB 		{ $$=TreeCreate(Boolean,$4,$2,NULL,$6,NULL,NULL,GArray);};
+	| ',' VARIABLE '[' DIGIT ']' GDStateBool 		{ $$=TreeCreate(Boolean,$4,$2,NULL,$6,NULL,NULL,Array);};
 	
-	| ',' VARIABLE '(' Args ')' GDStatementB			{	$$=TreeCreate(Boolean,0,$2,$4,$6,NULL,NULL,FunctionDecl);};
+	| ',' VARIABLE '(' Args ')' GDStateBool			{	$$=TreeCreate(Boolean,0,$2,$4,$6,NULL,NULL,FunctionDecl);};
 
 	| ';'  			{$$ = NULL; };
 
 
 
-//############################### FUNCTION PROTOTYPE ####################################################
+//############################### FUNCTION DEFINITION ####################################################
 
-Func :	INTEGER VARIABLE '(' Args ')' '{' DECL SDecl ENDDECL  BGIN  SList  Rstat  END '}'  Func {
-																temp1 = TreeCreate(Integer,0,$2,$4,$8,$11,$12,Function);
+Func :	INTEGER VARIABLE '(' Args ')' '{' DECL DStatement ENDDECL  BGIN  SList  Rstat  END '}'  Func {
+																temp1 = TreeCreate(Integer,0,$2,$4,$8,$11,$12,FunctionDecl);
 																$$=TreeCreate(Void,0,'\0',NULL,temp1,$15,NULL,Continue);};
 
-		| BOOLEAN VARIABLE '(' Args ')' '{' DECL SDecl ENDDECL  BGIN  SList  Rstat  END '}'  Func {
-																temp1 = TreeCreate(Boolean,0,$2,$4,$8,$11,$12,Function);
+		| BOOLEAN VARIABLE '(' Args ')' '{' DECL DStatement ENDDECL  BGIN  SList  Rstat  END '}'  Func {
+																temp1 = TreeCreate(Boolean,0,$2,$4,$8,$11,$12,FunctionDecl);
 																$$=TreeCreate(Void,0,'\0',NULL,temp1,$15,NULL,Continue);};
 	
-		|INTEGER MAIN '(' ')' '{' DECL SDecl ENDDECL  BGIN  SList  Rstat  END '}'  {
+		|INTEGER MAIN '(' ')' '{' DECL DStatement ENDDECL  BGIN  SList  Rstat  END '}'  {
 																$$=TreeCreate(Integer,0,"main",NULL,$7,$10,$11,Main);
 							    								MainNode=$$;};
 		
 //############################### FUNCTION ARGUMENTS ####################################################		
 
-Args:INTEGER VARIABLE ArgsI ';' Args  ArgsEnd		{$$=TreeCreate(Integer,0,$2,NULL,$3,$5,$6,Argument);};
+Args:INTEGER VARIABLE ArgsInt ArgEnd	{$$=TreeCreate(Integer,0,$2,NULL,$3,$4,NULL,Argument);};
 
-	| BOOLEAN VARIABLE ArgsB ';' Args ArgsEnd		{$$=TreeCreate(Boolean,0,$2,NULL,$3,$5,$6,Argument);};
+	| INTEGER '&' VARIABLE ArgsInt ArgEnd	{$$=TreeCreate(RefInt,0,$3,NULL,$4,$5,NULL,Argument);};
+
+	| BOOLEAN VARIABLE ArgsBool ArgEnd		{$$=TreeCreate(Boolean,0,$2,NULL,$3,$4,NULL,Argument);};
 	
-	|	ArgsEnd		{$$=$1;};
+	| BOOLEAN '&' VARIABLE ArgsBool ArgEnd		{$$=TreeCreate(RefBool,0,$3,NULL,$4,$5,NULL,Argument);};
+	
+   |					{$$ = NULL;};  
+    
+ArgEnd:';' Args		{$$=$2;};
 
-   |					{$$ = NULL;};
+   |					{$$ = NULL;}; 
     
-    
-ArgsEnd:INTEGER VARIABLE ArgsI		{$$=TreeCreate(Integer,0,$2,NULL,$3,NULL,NULL,Argument);};
+ArgsInt: ArgsInt ',' VARIABLE 				{$$=TreeCreate(Integer,0,$3,NULL,$1,NULL,NULL,Argument);};
 
-	| 	  BOOLEAN VARIABLE ArgsB		{$$=TreeCreate(Boolean,0,$2,NULL,$3,NULL,NULL,Argument);};
-    
-    
-    
-ArgsI:',' VARIABLE ArgsI				{$$=TreeCreate(Integer,0,$2,NULL,$3,NULL,NULL,Argument);};
+	| ArgsInt ',' '&' VARIABLE 				{$$=TreeCreate(RefInt,0,$4,NULL,$1,NULL,NULL,Argument);};
      
-     |				{  $$ = NULL;	}
+   |				{  $$ = NULL;	}
      
 
-ArgsB:',' VARIABLE ArgsB				{$$=TreeCreate(Boolean,0,$2,NULL,$3,NULL,NULL,Argument);};
+ArgsBool: ArgsBool ',' VARIABLE 				{$$=TreeCreate(Boolean,0,$3,NULL,$1,NULL,NULL,Argument);};
+
+	| ArgsBool ',' '&' VARIABLE 				{$$=TreeCreate(RefBool,0,$4,NULL,$1,NULL,NULL,Argument);};
      
-     |				{  $$ = NULL;	}  ;
+   |				{  $$ = NULL;	}  ;
 
 
 
 //############################### LOCAL DECL STATEMENTS ENDDECL ##########################################
 
-SDecl:DStatement		{$$=$1;};
 
 
-DStatement:INTEGER VARIABLE DStatementI DStatement		{
+DStatement:INTEGER VARIABLE DStateInt DStatement		{
 								temp1 = TreeCreate(Integer,1,$2,NULL,NULL,NULL,NULL,Decl);
 								$$=TreeCreate(Integer,0,'\0',NULL,temp1,$3,$4,Continue);};
 
-	| INTEGER VARIABLE '[' DIGIT ']' DStatementI DStatement {
+	| INTEGER VARIABLE '[' DIGIT ']' DStateInt DStatement {
 										temp1 = TreeCreate(Integer,$4,$2,NULL,NULL,NULL,NULL,Array);
 										$$=TreeCreate(Integer,0,'\0',NULL,temp1,$6,$7,Continue);};
 										
-	|BOOLEAN VARIABLE DStatementB DStatement		{
+	|BOOLEAN VARIABLE DStateBool DStatement		{
 								temp1 = TreeCreate(Boolean,1,$2,NULL,NULL,NULL,NULL,Decl);
 								$$=TreeCreate(Boolean,0,'\0',NULL,temp1,$3,$4,Continue);};
 
-	| BOOLEAN VARIABLE '[' DIGIT ']' DStatementB DStatement {
+	| BOOLEAN VARIABLE '[' DIGIT ']' DStateBool DStatement {
 										temp1 = TreeCreate(Boolean,$4,$2,NULL,NULL,NULL,NULL,Array);
 										$$=TreeCreate(Boolean,0,'\0',NULL,temp1,$6,$7,Continue);};
 
@@ -151,18 +152,18 @@ DStatement:INTEGER VARIABLE DStatementI DStatement		{
 
 //############################### MORE LOCAL INTEGER VARIABLE DECLARETION ####################################################
 
-DStatementI: ',' VARIABLE DStatementI				{	$$=TreeCreate(Integer,1,$2,NULL,$3,NULL,NULL,Decl);};
+DStateInt: ',' VARIABLE DStateInt				{	$$=TreeCreate(Integer,1,$2,NULL,$3,NULL,NULL,Decl);};
 
-	| ',' VARIABLE '[' DIGIT ']' DStatementI { $$=TreeCreate(Integer,$4,$2,NULL,$6,NULL,NULL,Decl);};
+	| ',' VARIABLE '[' DIGIT ']' DStateInt { $$=TreeCreate(Integer,$4,$2,NULL,$6,NULL,NULL,Decl);};
 
 	| ';'  			{$$ = NULL; };
 	
 
 //############################### MORE LOCAL BOOLEAN VARIABLE DECLARETION ####################################################
 
-DStatementB: ',' VARIABLE DStatementB				{	$$=TreeCreate(Boolean,1,$2,NULL,$3,NULL,NULL,Decl);};
+DStateBool: ',' VARIABLE DStateBool				{	$$=TreeCreate(Boolean,1,$2,NULL,$3,NULL,NULL,Decl);};
 
-	| ',' VARIABLE '[' DIGIT ']' DStatementB { $$=TreeCreate(Boolean,$4,$2,NULL,$6,NULL,NULL,Decl);};
+	| ',' VARIABLE '[' DIGIT ']' DStateBool { $$=TreeCreate(Boolean,$4,$2,NULL,$6,NULL,NULL,Decl);};
 
 	| ';'  			{$$ = NULL; };
 
@@ -179,23 +180,21 @@ SList: SList Statement		{ $$ = TreeCreate(Void,0,'\0',NULL,$1,$2,NULL,Continue);
 	
 //############################### SINGLE STATEMENT OF BODY ####################################################
 
-Statement: 	READ '(' VARIABLE ')' ';'     	{ $$ = TreeCreate(Integer,0,$3,NULL,NULL,NULL,NULL,Read); };
+Statement: 	READ '(' VARIABLE ')' ';'     	{ $$ = TreeCreate(Void,0,$3,NULL,NULL,NULL,NULL,Read); };
 
-	|READ '(' VARIABLE '[' E ']' ')' ';'     	{ $$ = TreeCreate(Integer,0,$3,NULL,$5,NULL,NULL,ArrayRead); };
+	|READ '(' VARIABLE '[' E ']' ')' ';'     	{ $$ = TreeCreate(Void,0,$3,NULL,$5,NULL,NULL,ArrayRead); };
 							
-	|WRITE '(' E ')' ';'    { $$ = TreeCreate(Integer,0,0,NULL,$3,NULL,NULL,Write); };
+	|WRITE '(' E ')' ';'    { $$ = TreeCreate(Void,0,0,NULL,$3,NULL,NULL,Write); };
 	
-	|VARIABLE '=' E ';' 	{ $$ = TreeCreate(Integer,0,$1,NULL,NULL,$3,NULL,Initialize); };
+	|VARIABLE '=' E ';' 		{ $$ = TreeCreate(Void,0,$1,NULL,NULL,$3,NULL,Initialize); };
 	
-	|VARIABLE '[' E ']' '=' E ';' 	{ $$ = TreeCreate(Integer,0,$1,NULL,$3,$6,NULL,ArrayInitialize); };
+	| E ';' 		{ $$ = TreeCreate(Void,0,NULL,NULL,NULL,$1,NULL,Expression); };
 	
-	|VARIABLE '=' BE ';' 	{ $$ = TreeCreate(Boolean,0,$1,NULL,NULL,$3,NULL,Initialize); };
+	|VARIABLE '[' E ']' '=' E ';' 	{ $$ = TreeCreate(Void,0,$1,NULL,$3,$6,NULL,ArrayInitialize); };
 	
-	|VARIABLE '[' E ']' '=' BE ';' 	{ $$ = TreeCreate(Boolean,0,$1,NULL,$3,$6,NULL,ArrayInitialize); };
-	
-	|IF '(' BE ')' THEN  SList  ElseStmt  ENDIF  {$$ = TreeCreate(Void,0,0,NULL,$3,$6,$7,Conditional);};
+	|IF '(' E ')' THEN  SList  ElseStmt  ENDIF  {$$ = TreeCreate(Void,0,0,NULL,$3,$6,$7,Conditional);};
 
-	|WHILE '(' BE ')' DO  SList  ENDWHILE  {$$ = TreeCreate(Void,0,0,NULL,$3,$6,NULL,Iterative);};
+	|WHILE '(' E ')' DO  SList  ENDWHILE  {$$ = TreeCreate(Void,0,0,NULL,$3,$6,NULL,Iterative);};
 	
 	
 ElseStmt: ELSE SList {$$ = $2;};
@@ -203,10 +202,10 @@ ElseStmt: ELSE SList {$$ = $2;};
 	| {$$ = NULL;};
 
 
-//############################### Arithmatic Expression ####################################################
+//############################### Arithmatic And Boolean Expression ####################################################
 
 
-E:	DIGIT  		{ $$ = TreeCreate(Integer,$1,'\0',NULL,NULL,NULL,NULL,Digit); };
+E:	DIGIT  			{ $$ = TreeCreate(Integer,$1,'\0',NULL,NULL,NULL,NULL,Digit); };
 
 	|E '+' E     	{ $$ = TreeCreate(Integer,0,'\0',NULL,$1,$3,NULL,Addition); }; 
 
@@ -214,66 +213,70 @@ E:	DIGIT  		{ $$ = TreeCreate(Integer,$1,'\0',NULL,NULL,NULL,NULL,Digit); };
 
 	|E '*' E     	{ $$ = TreeCreate(Integer,0,'\0',NULL,$1,$3,NULL,Multiplacation); };
 
-	|E '/' E 	{ $$ = TreeCreate(Integer,0,'\0',NULL,$1,$3,NULL,Division); };
+	|E '/' E 		{ $$ = TreeCreate(Integer,0,'\0',NULL,$1,$3,NULL,Division); };
 	
-	|E '%' E 	{ $$ = TreeCreate(Integer,0,'\0',NULL,$1,$3,NULL,Remainder); };
+	|E '%' E 		{ $$ = TreeCreate(Integer,0,'\0',NULL,$1,$3,NULL,Remainder); };
+	
+	|E GT E 			{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,GreaterThen); };
+	
+	|E GE E 			{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,GreaterThenEqual); };
+	
+	|E LT E 			{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,LessThen); };
+	
+	|E LE E 			{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,LessThenEqual); };
+	
+	|E EQ E 			{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,Equal); };
+	
+	|E NE E 			{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,NotEqual); };
+	
+	|E AND E     	{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,And); }; 
 
+	|E OR E     	{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,Or); };
+
+	|NOT E     		{ $$ = TreeCreate(Boolean,0,'\0',NULL,$2,NULL,NULL,Not); };
+
+	|TRU 				{ $$ = TreeCreate(Boolean,0,'\0',NULL,NULL,NULL,NULL,True); };
+	
+	|FALS 			{ $$ = TreeCreate(Boolean,0,'\0',NULL,NULL,NULL,NULL,False); };
+
+	|VARIABLE 	 	{ $$ = TreeCreate(Void,0,$1,NULL,NULL,NULL,NULL,Variable); };
+	
+	|VARIABLE '[' E ']'	 { $$ = TreeCreate(Void,0,$1,NULL,$3,NULL,NULL,ArrayVariable); };
+	
 	|'(' E ')'	{ $$ = $2; };
+	
+	|VARIABLE '(' ParaList ')' 	 { $$ = TreeCreate(Integer,0,$1,$3,NULL,NULL,NULL,Function); };
+	
+	
+//############################### PARAMETER ####################################################
 
-	|VARIABLE 	 { $$ = TreeCreate(Integer,0,$1,NULL,NULL,NULL,NULL,Variable); };
+ParaList: Parameter {$$ = $1;};
 	
-	|VARIABLE '[' E ']'	 { $$ = TreeCreate(Integer,0,$1,NULL,$3,NULL,NULL,ArrayVariable); };
-	
-	
+	|		 { $$ = NULL; };
 
+Parameter:E ',' Parameter   { $$ = TreeCreate(Integer,0,NULL,NULL,$1,$3,NULL,Argument); };
 
-//############################### BOOLEAN Expression ####################################################
+	| '&' VARIABLE ',' Parameter   { $$ = TreeCreate(Integer,0,$2,NULL,NULL,$4,NULL,Argument); };
 
-BE:BE AND BE     	{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,And); }; 
-
-	|BE OR BE     	{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,Or); };
-
-	|NOT BE     	{ $$ = TreeCreate(Boolean,0,'\0',NULL,$2,NULL,NULL,Not); };
-
-	|E GT E 	{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,GreaterThen); };
+	|E 	 { $$ = TreeCreate(Integer,0,NULL,NULL,$1,NULL,NULL,Argument); };
 	
-	|E GE E 	{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,GreaterThenEqual); };
-	
-	|E LT E 	{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,LessThen); };
-	
-	|E LE E 	{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,LessThenEqual); };
-	
-	|E EQ E 	{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,Equal); };
-	
-	|E NE E 	{ $$ = TreeCreate(Boolean,0,'\0',NULL,$1,$3,NULL,NotEqual); };
-	
-	|TRU 	{ $$ = TreeCreate(Boolean,0,'\0',NULL,NULL,NULL,NULL,True); };
-	
-	|FALS 	{ $$ = TreeCreate(Boolean,0,'\0',NULL,NULL,NULL,NULL,False); };
-
-	|'(' BE ')'	{ $$ = $2; };
-		
+	|'&' VARIABLE 	 { $$ = TreeCreate(Integer,0,$2,NULL,NULL,NULL,NULL,Argument); };
 
 
 //############################### RETURN STATEMENT ####################################################	
 	
-Rstat :	RETURN E ';'  {$$ = TreeCreate(Integer,0,'\0',NULL,$2,NULL,NULL,Return);};	
-	
-	|RETURN BE ';'  {$$ = TreeCreate(Boolean,0,'\0',NULL,$2,NULL,NULL,Return);};	
-
+Rstat :	RETURN E ';'  {$$ = TreeCreate(Void,0,'\0',NULL,$2,NULL,NULL,Return);};		
 
 
 //############################### END OF CFG ####################################################	
 %%
 
-int yyerror(char *s) 
-{
+int yyerror(char *s) {
 	fprintf(stderr, "%s\n", s);
 	return 1;
 }
 
-int main(int argc,char **argv) 
-{
+int main(int argc,char **argv) {
 	yyin=fopen(argv[1],"r");
   	yyparse();
 	fclose(yyin);

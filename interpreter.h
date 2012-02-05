@@ -1,46 +1,54 @@
-struct Gsymbol *T;
-int calculate(Tnode* Temp)
-{
-		switch(Temp->NODETYPE)
-		{
+int Evaluate(struct Lsymbol *LTable,Tnode* Node){
+	if(Node == NULL)
+		return;
+	struct Lsymbol *Lentry = NULL;
+	switch(Node->NODETYPE){
+			
+			case Function:
+				T = Glookup(Node->NAME);
+				installArgs(&Lentry,LTable,T->ARGLIST,Node->ArgList);
+				Traverse(&Lentry,T->FNode->Ptr1); 
+				Traverse(&Lentry,T->FNode->Ptr2);
+				return Traverse(&Lentry,T->FNode->Ptr3);
+
 			case Addition: 
-				return (calculate(Temp->Ptr1))+(calculate(Temp->Ptr2));
+				return (Evaluate(LTable,Node->Ptr1))+(Evaluate(LTable,Node->Ptr2));
 				
 			case Subtraction: 
-				return (calculate(Temp->Ptr1))-(calculate(Temp->Ptr2));
+				return (Evaluate(LTable,Node->Ptr1))-(Evaluate(LTable,Node->Ptr2));
 				
 			case Multiplacation: 
-				return (calculate(Temp->Ptr1))*(calculate(Temp->Ptr2));
+				return (Evaluate(LTable,Node->Ptr1))*(Evaluate(LTable,Node->Ptr2));
 				
 			case Division: 
-				return (calculate(Temp->Ptr1))/(calculate(Temp->Ptr2));
+				return (Evaluate(LTable,Node->Ptr1))/(Evaluate(LTable,Node->Ptr2));
 				
 			case Remainder: 
-				return (calculate(Temp->Ptr1))%(calculate(Temp->Ptr2));
+				return (Evaluate(LTable,Node->Ptr1))%(Evaluate(LTable,Node->Ptr2));
 				
 			case And:
-				return (calculate(Temp->Ptr1))&&(calculate(Temp->Ptr2));
+				return (Evaluate(LTable,Node->Ptr1))&&(Evaluate(LTable,Node->Ptr2));
 				
 			case Or:
-				return (calculate(Temp->Ptr1))||(calculate(Temp->Ptr2));
+				return (Evaluate(LTable,Node->Ptr1))||(Evaluate(LTable,Node->Ptr2));
 				
 			case Equal:
-				return (calculate(Temp->Ptr1))==(calculate(Temp->Ptr2));
+				return (Evaluate(LTable,Node->Ptr1))==(Evaluate(LTable,Node->Ptr2));
 				
 			case NotEqual:
-				return (calculate(Temp->Ptr1))!=(calculate(Temp->Ptr2));	
+				return (Evaluate(LTable,Node->Ptr1))!=(Evaluate(LTable,Node->Ptr2));	
 				
 			case GreaterThen:
-				return (calculate(Temp->Ptr1))>(calculate(Temp->Ptr2));
+				return (Evaluate(LTable,Node->Ptr1))>(Evaluate(LTable,Node->Ptr2));
 			
 			case GreaterThenEqual:
-				return (calculate(Temp->Ptr1))>=(calculate(Temp->Ptr2));
+				return (Evaluate(LTable,Node->Ptr1))>=(Evaluate(LTable,Node->Ptr2));
 				
 			case LessThen:
-				return (calculate(Temp->Ptr1))<(calculate(Temp->Ptr2));
+				return (Evaluate(LTable,Node->Ptr1))<(Evaluate(LTable,Node->Ptr2));
 				
 			case LessThenEqual:
-				return (calculate(Temp->Ptr1))<=(calculate(Temp->Ptr2));
+				return (Evaluate(LTable,Node->Ptr1))<=(Evaluate(LTable,Node->Ptr2));
 				
 			case True:
 				return 1;
@@ -49,82 +57,107 @@ int calculate(Tnode* Temp)
 				return 0;
 				
 			case Digit:
-					return Temp->VALUE;
+					return Node->VALUE;
 			
 			case Variable:
-					T = Glookup(Temp->NAME);
-    				if(T == NULL)
-    					printf("Variable %s Not Exist ",Temp->NAME);
-    				else
-    					return T->BINDING[Temp->VALUE];
+					L = Llookup(LTable,Node->NAME);
+	 				if(L != NULL)
+	 					return L->BINDING[Node->VALUE];
+	 				else {
+    					T = Glookup(Node->NAME);
+    					return T->BINDING[Node->VALUE];
+    				}
     					
     		case ArrayVariable:
-					T = Glookup(Temp->NAME);
-    				if(T == NULL)
-    					printf("Variable %s Not Exist ",Temp->NAME);
-    				else
-    					return T->BINDING[calculate(Temp->Ptr1)];
+    				L = Llookup(LTable,Node->NAME);
+	 				if(L != NULL)
+	 					return L->BINDING[Evaluate(LTable,Node->Ptr1)];
+	 				else{
+    					T = Glookup(Node->NAME);
+    					return T->BINDING[Evaluate(LTable,Node->Ptr1)];
+    				}
 		}
 }
-int Traverse(Tnode *Root)
-{
+int Traverse(struct Lsymbol **LTable,Tnode *Root){
 	if(Root==NULL)
-		return;
-	struct Gsymbol *Temp;	
-	switch(Root->NODETYPE)
-	{
+		return;	
+	struct Lsymbol *Lentry;
+	switch(Root->NODETYPE) {
+		
 		case Continue:
-			Traverse(Root->Ptr1);
-			Traverse(Root->Ptr2);
-			Traverse(Root->Ptr3);
+		case Main:
+			Traverse(LTable,Root->Ptr1);
+			Traverse(LTable,Root->Ptr2);
+			Traverse(LTable,Root->Ptr3);
 			break;
-    
-    	case Read:
-    		Temp = Glookup(Root->NAME);
-    		if(Temp == NULL)
-    				printf("Variable %s Not Exist ",Root->NAME);
-    		else
-    				scanf("%d",&Temp->BINDING[0]);
+	
+		case Decl:
+		case Array:
+			LinstallDynamic(LTable,Root->NAME,Root->TYPE,Root->VALUE);
+    		Traverse(LTable,Root->Ptr1);
+			break;
+			
+		case Return:
+			return Evaluate(*LTable,Root->Ptr1);
+				 	
+	 	case Read:
+	 		L = Llookup(*LTable,Root->NAME);
+	 		if(L != NULL)
+	 			scanf("%d",&L->BINDING[0]);
+	 		else {
+    			T = Glookup(Root->NAME);
+    			scanf("%d",&T->BINDING[0]);
+    		}
     		break;
     		
     	case ArrayRead:
-    		Temp = Glookup(Root->NAME);
-    		if(Temp == NULL)
-    				printf("Variable %s Not Exist ",Root->NAME);
-    		else
-    				scanf("%d",&Temp->BINDING[calculate(Root->Ptr1)]);
+    		L = Llookup(*LTable,Root->NAME);
+	 		if(L != NULL)
+	 			scanf("%d",&L->BINDING[Evaluate(*LTable,Root->Ptr1)]);
+	 		else {
+    			T = Glookup(Root->NAME);
+    			scanf("%d",&T->BINDING[Evaluate(*LTable,Root->Ptr1)]);
+    		}
     		break;
     		
     	case Conditional:
-    			if(calculate(Root->Ptr1))
-    				Traverse(Root->Ptr2);
-    			else
-    				Traverse(Root->Ptr3);
-    			break;
+    		if(Evaluate(*LTable,Root->Ptr1))
+    			Traverse(LTable,Root->Ptr2);
+    		else
+    			Traverse(LTable,Root->Ptr3);
+    		break;
     			
     	case Iterative:
-    			while(calculate(Root->Ptr1))
-    				Traverse(Root->Ptr2);
-    			break;
+    		while(Evaluate(*LTable,Root->Ptr1))
+    			Traverse(LTable,Root->Ptr2);
+    		break;
     	
     	case Write:
-    		printf("%d\n",calculate(Root->Ptr1));
-   			break;
+    		printf("%d\n",Evaluate(*LTable,Root->Ptr1));
+   		break;
+    	
+    	case Expression:
+    		Evaluate(*LTable,Root->Ptr2);
+    		break;
     	
     	case Initialize:
-    		Temp = Glookup(Root->NAME);
-    		if(Temp == NULL)
-    				printf("Variable %s Not Exist ",Root->NAME);
-    		else
-    				Temp->BINDING[0] = calculate(Root->Ptr2);
+    		L = Llookup(*LTable,Root->NAME);
+	 		if(L != NULL)
+	 			L->BINDING[0] = Evaluate(*LTable,Root->Ptr2);
+	 		else {
+    			T = Glookup(Root->NAME);
+    			T->BINDING[0] = Evaluate(*LTable,Root->Ptr2);
+    		}
     		break;
     		
     	case ArrayInitialize:
-    		Temp = Glookup(Root->NAME);
-    		if(Temp == NULL)
-    				printf("Variable %s Not Exist ",Root->NAME);
-    		else
-    				Temp->BINDING[calculate(Root->Ptr1)] = calculate(Root->Ptr2);
+    		L = Llookup(*LTable,Root->NAME);
+	 		if(L != NULL)
+	 			L->BINDING[Evaluate(*LTable,Root->Ptr1)] = Evaluate(*LTable,Root->Ptr2);
+	 		else {
+    			T = Glookup(Root->NAME);
+    			T->BINDING[Evaluate(*LTable,Root->Ptr1)] = Evaluate(*LTable,Root->Ptr2);
+    		}
     		break;
     		  	    
 	}    

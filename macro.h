@@ -35,5 +35,7 @@
 #define Return 34
 #define Argument 35
 #define FunctionDecl 36
-#define GDecl 37
-#define GArray 38
+#define Expression 37
+#define Parameter 38
+#define RefInt 39
+#define RefBool 40

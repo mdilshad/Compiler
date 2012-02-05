@@ -1,0 +1,25 @@
+decl
+	integer factorial(integer &n);
+enddecl
+integer factorial (integer &n)
+{
+	decl
+		integer rvalue;
+	enddecl
+	begin
+		n=n-1;
+		return rvalue;
+	end
+}
+integer main()
+{
+	decl
+		integer x;
+	enddecl
+	begin
+		x=5;
+		factorial(&x);
+		write(x);
+		return 1;
+	end
+}

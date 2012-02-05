@@ -1,12 +1,13 @@
-void LocalSemanticAnalysis(Tnode* Node)
+void LocalSemanticAnalysis(struct Lsymbol **LTable,Tnode* Node)
 {
+	if(Node == NULL)
+		return;
 	switch(Node->NODETYPE)
-	{
-	
+	{	
 		case Continue:
-			LocalSemanticAnalysis(Node->Ptr1);
-			LocalSemanticAnalysis(Node->Ptr2);
-			LocalSemanticAnalysis(Node->Ptr3);
+			LocalSemanticAnalysis(LTable,Node->Ptr1);
+			LocalSemanticAnalysis(LTable,Node->Ptr2);
+			LocalSemanticAnalysis(LTable,Node->Ptr3);
 			break;
 		
 		case Addition: 
@@ -61,15 +62,17 @@ void LocalSemanticAnalysis(Tnode* Node)
     	
    	case Decl:
    	case Array:
-   		if(Glookup(Node->NAME))
+   		if(Llookup(*LTable,Node->NAME))
    			printf("Variable %s already Exist ",Node->NAME);
    		else
-   			Node->Lentry = Linstall(Node->NAME,Node->TYPE,Node->VALUE);
+   			Linstall(LTable,Node->NAME,Node->TYPE);
    		break;    	    
 	}    
 }
 void GlobalSemanticAnalysis(Tnode* Node)
 {
+	if(Node == NULL)
+		return;
 	struct ArgStruct *ArgList;
 	switch(Node->NODETYPE)
 	{
@@ -79,12 +82,12 @@ void GlobalSemanticAnalysis(Tnode* Node)
 			GlobalSemanticAnalysis(Node->Ptr3);
 			break;
 				
-		case GDecl:
-    	case GArray:
+		case Decl:
+    	case Array:
     		if(Glookup(Node->NAME))
     			printf("Variable %s already Exist ",Node->NAME);
     		else
-    			Node->Gentry = Ginstall(Node->NAME,Node->TYPE,Node->VALUE,NULL);
+    		Ginstall(Node->NAME,Node->TYPE,Node->VALUE,NULL);
     		GlobalSemanticAnalysis(Node->Ptr1);
     		break;
     	
@@ -94,7 +97,7 @@ void GlobalSemanticAnalysis(Tnode* Node)
     		else
     		{
     			ArgList = Arginstall(Node->ArgList);
-    			Node->Gentry = Ginstall(Node->NAME,Node->TYPE,Node->VALUE,ArgList);
+    			Ginstall(Node->NAME,Node->TYPE,Node->VALUE,ArgList);
     		}
     		GlobalSemanticAnalysis(Node->Ptr1);
     		break;

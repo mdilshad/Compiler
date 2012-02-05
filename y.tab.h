@@ -113,7 +113,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 12 "compiler.y"
+#line 11 "compiler.y"
 
 	int Num;
 	char ch,*chp;
