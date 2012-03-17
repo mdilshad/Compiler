@@ -1,32 +1,29 @@
-decl
-	integer factorial(integer n);
-enddecl
-integer factorial (integer n)
-{
-	decl
-		integer rvalue;
-	enddecl
-	begin
-		if(n == 0) then
-			rvalue = 1;
-		else
-			rvalue = n * factorial(n-1);
-		endif
-		return rvalue;
-	end
+typedef dilshad{
+	integer x;
+	integer y;
 }
-integer main()
-{
+typedef ranjeet{
+	dilshad t;
+	boolean u;
+}
+typedef saddam{
+	ranjeet p;
+	integer q;
+}
+decl
+	saddam a,b;
+enddecl
+
+integer main(){
 	decl
-		integer n,i;
+		saddam m,n;
+		integer temp;
 	enddecl
+
 	begin
-		read(n);
-		i=1;
-		while(i<=n)do
-			write(factorial(i));
-			i = i+1;
-		endwhile
+		read(a.p.t.x);
+		b.q = a.p.t.x;
+		write(b.q);
 		return 1;
 	end
 }

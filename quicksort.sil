@@ -1,0 +1,75 @@
+decl
+	integer a[10],partition(integer p,r),quicksort(integer p,r);
+enddecl
+
+
+integer partition(integer p,r){
+	decl
+		integer x,i,j,temp;
+	enddecl
+	begin
+		x=a[r];
+		i=p-1;
+		j=p;
+
+		while(j<=(r-1))do
+
+			if(a[j]<=x)then
+				i=i+1;
+				temp=a[i];
+				a[i]=a[j];
+				a[j]=temp;
+			endif;
+
+			j=j+1;
+
+		endwhile;
+
+		temp=a[i+1];
+		a[i+1]=a[r];
+		a[r]=temp;
+		return i+1;
+	end
+}
+
+integer quicksort(integer p,r){
+	decl
+		integer q,temp;
+	enddecl
+	begin
+
+		if(p<r)then
+			q=partition(p,r);
+			temp = quicksort(p,q-1);
+			temp = quicksort(q+1,r);
+		endif;
+
+		return 0;
+	end
+}
+
+integer main(){
+	decl
+		integer n,i,temp;
+	enddecl
+	begin
+
+		read(n);
+
+		i=0;
+		while(i<n)do
+			read(a[i]); 
+			i=i+1;
+		endwhile;
+	
+		temp = quicksort(0,n-1);
+
+		i=0;
+		while(i<n)do
+			write(a[i]); 
+			i=i+1;
+		endwhile;
+
+		return 0;
+	end
+}

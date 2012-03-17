@@ -2,51 +2,25 @@ struct ArgStruct{
 
 	char *NAME; // Name of the Identifier
 
+	struct tnode *EXP; // Expression Entry
+
 	int TYPE; // TYPE can be INTEGER or BOOLEAN
 
 	struct ArgStruct *NEXT;// Pointer to next Argument Entry 
 };
-union BINDING{
-	int * IBINDING;
-	//Tnode *NBINDING;
-};
-struct Gsymbol {
+
+typedef struct field {
 
 	char *NAME; // Name of the Identifier
 
-	int TYPE; // TYPE can be INTEGER or BOOLEAN
+	char *TYPENAME; // Name of the typedef
 
-	/***The TYPE field must be a TypeStruct if user defined types are allowed***/
+	int TYPE; // Integer, Boolean or TYPEDEF
 
-	int SIZE; // Size field for arrays
+	struct field *NEXT; // Pointer to next field Entry */
 
-	int *BINDING; // Address of the Identifier in Memory
-	
-	struct tnode *FNode; // Address of the Function in Tree
+}Field;
 
-	struct ArgStruct *ARGLIST; // Argument List for functions
-
-	/***Argstruct must store the name and type of each argument ***/
-
-	struct Gsymbol *NEXT; // Pointer to next Symbol Table Entry */
-
-}*GTable;
-
-struct Lsymbol {
-
-	char *NAME; // Name of the Identifier
-
-	int TYPE; // TYPE can be INTEGER or BOOLEAN
-
-	/***The TYPE field must be a TypeStruct if user defined types are allowed***/
-
-	int SIZE; // Size field for arrays
-
-	int *BINDING; // Address of the Identifier in Memory
-
-	struct Lsymbol *NEXT; // Pointer to next Symbol Table Entry */
-
-};
 
 typedef struct tnode {
 
@@ -62,18 +36,105 @@ typedef struct tnode {
 
 	int VALUE; // for constants
 	
-	struct tnode *ArgList; // List of arguments for functions
+	struct ArgStruct *ArgList; // List of arguments for functions
 
 	struct tnode *Ptr1, *Ptr2, *Ptr3;
 	/* Maximum of three subtrees (3 required for IF THEN ELSE */
 
-	//struct Gsymbol *Gentry; // For global identifiers/functions
-
-	//struct Lsymbol *Lentry; // For Local variables
-
 }Tnode;
 
-struct Gsymbol *T;
-struct Lsymbol *L;
+typedef struct typeDef {
+
+	char *NAME; // Name of the Identifier
+
+	Field *FLIST; // Argument List for functions
+
+	/***field must store the name and type of each member ***/
+
+	struct typeDef *NEXT; // Pointer to next Symbol Table Entry */
+
+}TypeDef;
+
+struct Gsymbol {
+
+	char *NAME; // Name of the Identifier
+
+	int TYPE; // TYPE can be INTEGER or BOOLEAN
+
+	char *TYPENAME; // Name of the typedef
+
+	int flag;
+
+	int SIZE; // Size field for arrays
+
+	int *BINDING; // Address of the Identifier in Memory
+
+	struct tnode *FNode; // Address of the Function in Tree
+
+	struct Gsymbol **Tentry;// Address of Nested Typedef in Memory
+
+	struct ArgStruct *ARGLIST; // Argument List for functions
+
+	/***Argstruct must store the name and type of each argument ***/
+
+	struct Gsymbol *NEXT; // Pointer to next Symbol Table Entry */
+
+}*GTable;
+
+
+struct Lsymbol {
+
+	char *NAME; // Name of the Identifier
+
+	int TYPE; // TYPE can be INTEGER or BOOLEAN
+
+	char *TYPENAME;
+
+	int flag;
+
+	int *BINDING; // Address of the Identifier in Memory
+
+	struct ArgStruct *ARGLIST; // Argument List for functions
+
+	struct tnode *FNode; // Address of the Function in Tree
+
+	struct Lsymbol *Tentry;// Address of Nested Typedef in Memory
+
+	struct Lsymbol *NEXT; // Pointer to next Symbol Table Entry */
+
+};
+
+typedef struct tsymbol {
+
+	char *NAME; // Name of the Identifier
+
+	int TYPE; // TYPE can be INTEGER or BOOLEAN or user defined
+
+	char *TYPENAME;// Name of user defined type
+
+	int *BINDING; // Address of the Identifier in Memory
+
+	struct tsymbol *Tentry;// Address of Nested Typedef in Memory
+
+	struct tsymbol *NEXT; // Pointer to next Symbol Table Entry */
+
+}Tsymbol;
+
+
+typedef struct ltable{
+
+	struct Lsymbol *Lentry;// Address of Nested Local Table in Memory
+
+	struct ltable *NEXT; // Pointer to next Local Table Entry */
+}LTABLE;
+
+
+
+TypeDef *TypeTable = NULL,*TD;
+LTABLE *LHead = NULL;
+struct Gsymbol *T,*TEMP;
+struct ArgStruct *ArgTemp;
+struct Lsymbol *L,*LTemp,*LTEMP;
 Tnode *temp1,*temp2,*MainNode;
-int flag;
+int flag,i,Aflag;
+FILE *fp;

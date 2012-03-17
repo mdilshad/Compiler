@@ -1,0 +1,19 @@
+decl
+	integer a[5];
+enddecl
+
+integer main(){
+	decl
+		integer i,n;
+	enddecl
+
+	begin
+		i=0;
+		read(n);
+		while(i<n)do
+			write(i);
+			i = i+1;
+		endwhile;
+		return 1;
+	end
+}

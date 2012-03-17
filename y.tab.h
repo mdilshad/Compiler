@@ -40,70 +40,76 @@
       know about them.  */
    enum yytokentype {
      DIGIT = 258,
-     VARIABLE = 259,
+     Identifier = 259,
      READ = 260,
      WRITE = 261,
-     BGIN = 262,
-     END = 263,
-     DECL = 264,
-     ENDDECL = 265,
-     INTEGER = 266,
-     BOOLEAN = 267,
-     AND = 268,
-     OR = 269,
-     NOT = 270,
-     GT = 271,
-     GE = 272,
-     LT = 273,
-     LE = 274,
-     EQ = 275,
-     NE = 276,
-     FALS = 277,
-     TRU = 278,
-     IF = 279,
-     ELSE = 280,
-     THEN = 281,
-     ENDIF = 282,
-     WHILE = 283,
-     DO = 284,
-     ENDWHILE = 285,
-     RETURN = 286,
-     MAIN = 287,
-     NQ = 288
+     NEW = 262,
+     FREE = 263,
+     TYPEDEF = 264,
+     BGIN = 265,
+     END = 266,
+     DECL = 267,
+     ENDDECL = 268,
+     INTEGER = 269,
+     BOOLEAN = 270,
+     AND = 271,
+     OR = 272,
+     NOT = 273,
+     GT = 274,
+     GE = 275,
+     LT = 276,
+     LE = 277,
+     EQ = 278,
+     NE = 279,
+     FALS = 280,
+     TRU = 281,
+     IF = 282,
+     ELSE = 283,
+     THEN = 284,
+     ENDIF = 285,
+     WHILE = 286,
+     DO = 287,
+     ENDWHILE = 288,
+     RETURN = 289,
+     MAIN = 290,
+     NQ = 291
    };
 #endif
 /* Tokens.  */
 #define DIGIT 258
-#define VARIABLE 259
+#define Identifier 259
 #define READ 260
 #define WRITE 261
-#define BGIN 262
-#define END 263
-#define DECL 264
-#define ENDDECL 265
-#define INTEGER 266
-#define BOOLEAN 267
-#define AND 268
-#define OR 269
-#define NOT 270
-#define GT 271
-#define GE 272
-#define LT 273
-#define LE 274
-#define EQ 275
-#define NE 276
-#define FALS 277
-#define TRU 278
-#define IF 279
-#define ELSE 280
-#define THEN 281
-#define ENDIF 282
-#define WHILE 283
-#define DO 284
-#define ENDWHILE 285
-#define RETURN 286
-#define MAIN 287
-#define NQ 288
+#define NEW 262
+#define FREE 263
+#define TYPEDEF 264
+#define BGIN 265
+#define END 266
+#define DECL 267
+#define ENDDECL 268
+#define INTEGER 269
+#define BOOLEAN 270
+#define AND 271
+#define OR 272
+#define NOT 273
+#define GT 274
+#define GE 275
+#define LT 276
+#define LE 277
+#define EQ 278
+#define NE 279
+#define FALS 280
+#define TRU 281
+#define IF 282
+#define ELSE 283
+#define THEN 284
+#define ENDIF 285
+#define WHILE 286
+#define DO 287
+#define ENDWHILE 288
+#define RETURN 289
+#define MAIN 290
+#define NQ 291
 
 
 
@@ -113,16 +119,19 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 11 "compiler.y"
+#line 9 "compiler.y"
 
 	int Num;
-	char ch,*chp;
+	char* chp;
 	struct tnode* Node;
+	struct field* FNode;
+	struct typeDef* TNode;
+	struct ArgStruct* ArgNode;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 126 "y.tab.h"
+#line 135 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
